@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import ChatHistory from "../models/chatHistory.js";
+import SaveChat from "./saveChat.js";
 
 async function getGeminiResponse(prompt) {
   try {
@@ -32,13 +32,9 @@ async function getGeminiResponse(prompt) {
       "No response available.";
 
     // Save chat history for the Gemini response
-    const chatHistory = new ChatHistory({
-      user_input: prompt,
-      bot_response: responseText,
-      timestamp: new Date(),
-    });
-    await chatHistory.save();
+    await SaveChat(prompt, responseText);
 
+    // return formattedMessage;
     return responseText;
   } catch (error) {
     console.error("Error connecting to Gemini API:", error);

@@ -60,7 +60,7 @@ bot.on("text", async (ctx) => {
     ctx.reply(searchResponse);
   } else {
     const geminiResponse = await getGeminiResponse(userMessage);
-    ctx.reply(geminiResponse);
+    ctx.reply(geminiResponse, { parse_mode: "Markdown" });
   }
 });
 

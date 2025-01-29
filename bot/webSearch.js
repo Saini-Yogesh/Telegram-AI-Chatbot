@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import ChatHistory from "../models/chatHistory.js";
+import SaveChat from "./saveChat.js";
 
 async function webSearch(query) {
   try {
@@ -25,12 +25,7 @@ async function webSearch(query) {
     }
 
     // Save the web search query and response in the chat history
-    const chatHistory = new ChatHistory({
-      user_input: `/websearch ${query}`,
-      bot_response: replyMessage,
-      timestamp: new Date(),
-    });
-    await chatHistory.save();
+    await SaveChat(`/websearch ${query}`, replyMessage);
 
     return replyMessage;
   } catch (error) {
