@@ -23,7 +23,7 @@ async function getGeminiResponse(prompt) {
     const result = await response.json();
 
     if (result.error) {
-      return "Sorry, I couldn't process your request.";
+      return `Sorry, I couldn't process your request:-\n\n ${result.error.message}`;
     }
 
     // Extract the response text from the content's parts

@@ -1,9 +1,11 @@
 import { Telegraf } from "telegraf";
 import mongoose from "mongoose";
-import User from "../models/user.js";
 import dotenv from "dotenv";
-
 dotenv.config();
+
+// models
+import User from "../models/user.js";
+import FileMetadata from "../models/fileMetadata.js";
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 
@@ -17,7 +19,8 @@ import getGeminiResponse from "./Gemini.js";
 // Web search functionality
 import webSearch from "./webSearch.js";
 
-// File analysis functionality
+// Image/file Handling functionality
+import fileAnalysices from "./fileAnalysices.js";
 
 // Handle /start command and user registration
 bot.start(async (ctx) => {
@@ -64,9 +67,38 @@ bot.on("text", async (ctx) => {
   }
 });
 
-// Image/File Handling
+// Image/file Handling
 bot.on(["photo", "document"], async (ctx) => {
-  ctx.reply("This feature is under development. Please check back later.");
+  try {
+    // Extract file information (photo or document)
+    const fileId = ctx.message.photo
+      ? ctx.message.photo[0].file_id
+      : ctx.message.document.file_id;
+    const fileType = ctx.message.photo
+      ? "photo"
+      : ctx.message.document.mime_type; // Check type for document (e.g., PDF, DOCX)
+    const file = await bot.telegram.getFile(fileId);
+    const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+
+    // Analyze the image/file using the Gemini API (or any other image analysis API)
+    const description = await GetGeminiResponseForPhoto(fileUrl);
+
+    // Save metadata (filename, file type, description) in MongoDB
+    const fileMetadata = new FileMetadata({
+      file_name: file.file_name || "Unnamed File", // Ensure file_name is available
+      file_type: fileType,
+      description: description, // Ensure description is available
+      timestamp: new Date(),
+    });
+
+    await fileMetadata.save();
+
+    // Send the analysis result to the user
+    ctx.reply(`Here's what I found:-\n\n ${description}`);
+  } catch (error) {
+    console.error("Error during file/image analysis:", error);
+    ctx.reply("Sorry, there was an error analyzing the file.");
+  }
 });
 
 // Start the bot
