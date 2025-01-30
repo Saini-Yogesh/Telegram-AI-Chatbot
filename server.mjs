@@ -1,17 +1,16 @@
-import express from "express";
-import dotenv from "dotenv";
-import "./bot/bot.js"; // Import the bot logic
+import express from "express"; // Import Express
+import dotenv from "dotenv"; // Import dotenv for environment variables
+import "./bot/bot.js"; // Import bot logic
 
-// Load environment variables
-dotenv.config();
+dotenv.config(); // Load environment variables
 
-const app = express();
-const port = 3000;
+const app = express(); // Initialize Express app
+const port = 3000; // Define port
 
 app.get("/", (req, res) => {
-  res.send("TalkToGeminiBot is running!");
+  res.send("TalkToGeminiBot is running!"); // Root route message
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`); // Log server start
 });

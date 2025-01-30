@@ -1,37 +1,38 @@
-import fetch from "node-fetch";
-import SaveChat from "./saveChat.js";
+import fetch from "node-fetch"; // Import fetch for API requests
+import SaveChat from "./saveChat.js"; // Import SaveChat to save chat history
 
 async function webSearch(query) {
   try {
-    const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
-    const searchEngineId = process.env.SEARCH_ENGINE_ID;
+    const apiKey = process.env.GOOGLE_SEARCH_API_KEY; // Get API key
+    const searchEngineId = process.env.SEARCH_ENGINE_ID; // Get search engine ID
 
+    // Build the search URL
     const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(
       query
     )}`;
 
-    const response = await fetch(searchUrl);
-    const searchResults = await response.json();
+    const response = await fetch(searchUrl); // Fetch search results
+    const searchResults = await response.json(); // Parse JSON response
 
     let replyMessage;
 
+    // If results exist, format the reply message
     if (searchResults.items?.length) {
       replyMessage = searchResults.items
         .slice(0, 3)
         .map((result) => `${result.title}\n🔗 ${result.link}`)
         .join("\n\n");
     } else {
-      replyMessage = `No search results found for "${query}".`;
+      replyMessage = `No search results found for "${query}".`; // No results message
     }
 
-    // Save the web search query and response in the chat history
-    await SaveChat(`/websearch ${query}`, replyMessage);
+    await SaveChat(`/websearch ${query}`, replyMessage); // Save chat history
 
-    return replyMessage;
+    return replyMessage; // Return reply message
   } catch (error) {
-    console.error("Error during web search:", error);
-    return "An error occurred while performing the web search.";
+    console.error("Error during web search:", error); // Log errors
+    return "An error occurred while performing the web search."; // Error message
   }
 }
 
-export default webSearch;
+export default webSearch; // Export the function

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 dotenv.config();
 
-// models
+// Models
 import User from "../models/user.js";
 import FileMetadata from "../models/fileMetadata.js";
 
@@ -13,14 +13,10 @@ const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 mongoose.set("strictQuery", true);
 mongoose.connect(process.env.MONGODB_URI);
 
-// Function to get response from Gemini API
-import getGeminiResponse from "./Gemini.js";
-
-// Web search functionality
-import webSearch from "./webSearch.js";
-
-// Image/file Handling functionality
-import fileAnalysices from "./fileAnalysices.js";
+// Functions for API handling
+import getGeminiResponse from "./gemini.js"; // Gemini API response
+import webSearch from "./webSearch.js"; // Web search feature
+import fileAnalysices from "./fileAnalysices.js"; // Image/file analysis
 
 // Handle /start command and user registration
 bot.start(async (ctx) => {
@@ -53,7 +49,7 @@ bot.on("contact", async (ctx) => {
   }
 });
 
-// Handle messages (Gemini and web search)
+// Handle text messages (Gemini and web search)
 bot.on("text", async (ctx) => {
   const userMessage = ctx.message.text;
 
@@ -67,7 +63,7 @@ bot.on("text", async (ctx) => {
   }
 });
 
-// Image/file Handling
+// Handle image/file messages
 bot.on(["photo", "document"], async (ctx) => {
   try {
     // Extract file information (photo or document)
@@ -76,18 +72,18 @@ bot.on(["photo", "document"], async (ctx) => {
       : ctx.message.document.file_id;
     const fileType = ctx.message.photo
       ? "photo"
-      : ctx.message.document.mime_type; // Check type for document (e.g., PDF, DOCX)
+      : ctx.message.document.mime_type;
     const file = await bot.telegram.getFile(fileId);
     const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
 
-    // Analyze the image/file using the Gemini API (or any other image analysis API)
-    const description = await GetGeminiResponseForPhoto(fileUrl);
+    // Analyze the file
+    const description = await fileAnalysices(fileUrl);
 
-    // Save metadata (filename, file type, description) in MongoDB
+    // Save metadata in MongoDB
     const fileMetadata = new FileMetadata({
-      file_name: file.file_name || "Unnamed File", // Ensure file_name is available
+      file_name: file.file_name || "Unnamed File",
       file_type: fileType,
-      description: description, // Ensure description is available
+      description: description,
       timestamp: new Date(),
     });
 
